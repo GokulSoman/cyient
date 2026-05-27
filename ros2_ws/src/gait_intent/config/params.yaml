@@ -1,0 +1,51 @@
+/**:
+  ros__parameters:
+    # IMU window configuration
+    window_size: 200          # samples per classification window (200 ms @ 1kHz)
+    step_size: 100            # hop between windows (50% overlap)
+    n_channels: 6             # IMU channels (accel xyz + gyro xyz)
+    n_classes: 7              # locomotion modes
+
+    # Sampling rate
+    fs: 1000.0                # Hz
+
+    # Bandpass filter
+    filter_lowcut: 0.5        # Hz
+    filter_highcut: 40.0      # Hz
+    filter_order: 4
+
+    # Model paths (relative to package install or absolute)
+    model_path: "results/gait_cnn.pt"
+    rf_path: "results/gait_rf.pkl"
+    norm_mean_path: "config/norm_mean.npy"
+    norm_std_path: "config/norm_std.npy"
+
+    # FSM hysteresis
+    hysteresis: 3             # consecutive same predictions before switching
+
+    # Training configuration
+    cnn_epochs: 50
+    cnn_batch_size: 64
+    cnn_lr: 0.001
+    cnn_patience: 10          # early stopping patience
+
+    # Activity class names (for logging)
+    class_names:
+      - "level_walking"
+      - "stair_ascent"
+      - "stair_descent"
+      - "ramp_ascent"
+      - "ramp_descent"
+      - "standing"
+      - "sit_to_stand"
+
+    # Torque scales (per FSM state)
+    torque_scales:
+      IDLE: 0.0
+      STANDING: 0.0
+      LEVEL_WALKING: 1.0
+      STAIR_ASCENT: 1.5
+      STAIR_DESCENT: 0.8
+      RAMP_ASCENT: 1.2
+      RAMP_DESCENT: 0.8
+      SIT_TO_STAND: 2.0
