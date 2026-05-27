@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--
+  catheter_arm.srdf  —  Semantic Robot Description Format for MoveIt2
+
+  Planning group "arm": chain from base_link to needle_link (6-DOF + fixed needle)
+-->
+<robot name="catheter_arm">
+
+  <!-- ── Planning group ────────────────────────────────────────────── -->
+  <group name="arm">
+    <chain base_link="base_link" tip_link="needle_link"/>
+  </group>
+
+  <!-- ── End-effector ──────────────────────────────────────────────── -->
+  <end_effector name="needle_ee" parent_link="needle_link" group="arm"/>
+
+  <!-- ── Virtual joint attaching robot base to world frame ─────────── -->
+  <virtual_joint name="virtual_joint"
+                 type="fixed"
+                 parent_frame="world"
+                 child_link="base_link"/>
+
+  <!-- ── Default joint configuration (all zeros = home position) ────── -->
+  <group_state name="home" group="arm">
+    <joint name="shoulder_joint"  value="0"/>
+    <joint name="upper_arm_joint" value="0"/>
+    <joint name="forearm_joint"   value="-0.5"/>
+    <joint name="wrist1_joint"    value="0"/>
+    <joint name="wrist2_joint"    value="0"/>
+  </group_state>
+
+  <!-- ── Disable self-collision between adjacent links ──────────────── -->
+  <disable_collisions link1="base_link"      link2="shoulder_link"   reason="Adjacent"/>
+  <disable_collisions link1="shoulder_link"  link2="upper_arm_link"  reason="Adjacent"/>
+  <disable_collisions link1="upper_arm_link" link2="forearm_link"    reason="Adjacent"/>
+  <disable_collisions link1="forearm_link"   link2="wrist1_link"     reason="Adjacent"/>
+  <disable_collisions link1="wrist1_link"    link2="wrist2_link"     reason="Adjacent"/>
+  <disable_collisions link1="wrist2_link"    link2="needle_link"     reason="Adjacent"/>
+
+  <!-- ── Base never collides with world (static fixture) ────────────── -->
+  <disable_collisions link1="base_link" link2="world" reason="Never"/>
+
+  <!-- ── Non-adjacent but safe pairs (prevent false positive warnings) ─ -->
+  <disable_collisions link1="base_link"      link2="upper_arm_link" reason="Never"/>
+  <disable_collisions link1="shoulder_link"  link2="forearm_link"   reason="Never"/>
+
+</robot>

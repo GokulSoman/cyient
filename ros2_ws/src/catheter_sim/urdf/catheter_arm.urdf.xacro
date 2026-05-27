@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<!--
+  catheter_arm.urdf.xacro
+  6-DOF serial robotic arm for femoral artery catheterization guidance.
+
+  Kinematic chain:
+    world → base_link → shoulder_link → upper_arm_link →
+    forearm_link → wrist1_link → wrist2_link → needle_link (EE)
+
+  Hardware interface: gz_ros2_control / GazeboSimSystem
+-->
+<robot name="catheter_arm" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ================================================================
+       MATERIALS
+       ================================================================ -->
+  <material name="grey">
+    <color rgba="0.5 0.5 0.5 1.0"/>
+  </material>
+  <material name="blue">
+    <color rgba="0.0 0.4 0.8 1.0"/>
+  </material>
+  <material name="silver">
+    <color rgba="0.8 0.8 0.9 1.0"/>
+  </material>
+
+  <!-- ================================================================
+       MACROS
+       ================================================================ -->
+
+  <!-- Cylinder inertia: Ixx = Iyy = m(3r²+h²)/12, Izz = mr²/2 -->
+  <xacro:macro name="cylinder_inertia" params="mass radius length">
+    <inertial>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass * (3 * radius**2 + length**2) / 12.0}"
+        ixy="0" ixz="0"
+        iyy="${mass * (3 * radius**2 + length**2) / 12.0}"
+        iyz="0"
+        izz="${mass * radius**2 / 2.0}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ================================================================
+       WORLD / BASE
+       ================================================================ -->
+
+  <link name="world"/>
+
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <xacro:cylinder_inertia mass="5.0" radius="0.08" length="0.05"/>
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.08" length="0.05"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.08" length="0.05"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       SHOULDER
+       ================================================================ -->
+
+  <joint name="shoulder_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="shoulder_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-3.14159" upper="3.14159" effort="100" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.0"/>
+  </joint>
+
+  <link name="shoulder_link">
+    <xacro:cylinder_inertia mass="1.0" radius="0.06" length="0.05"/>
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.06" length="0.05"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.06" length="0.05"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       UPPER ARM
+       ================================================================ -->
+
+  <joint name="upper_arm_joint" type="revolute">
+    <parent link="shoulder_link"/>
+    <child link="upper_arm_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-1.5708" upper="1.5708" effort="100" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.0"/>
+  </joint>
+
+  <link name="upper_arm_link">
+    <xacro:cylinder_inertia mass="1.5" radius="0.04" length="0.3"/>
+    <visual>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.04" length="0.3"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.04" length="0.3"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       FOREARM
+       ================================================================ -->
+
+  <joint name="forearm_joint" type="revolute">
+    <parent link="upper_arm_link"/>
+    <child link="forearm_link"/>
+    <origin xyz="0 0 0.3" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14159" upper="0.0" effort="100" velocity="1.0"/>
+    <dynamics damping="0.5" friction="0.0"/>
+  </joint>
+
+  <link name="forearm_link">
+    <xacro:cylinder_inertia mass="1.0" radius="0.035" length="0.25"/>
+    <visual>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.035" length="0.25"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.125" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.035" length="0.25"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       WRIST 1
+       ================================================================ -->
+
+  <joint name="wrist1_joint" type="revolute">
+    <parent link="forearm_link"/>
+    <child link="wrist1_link"/>
+    <origin xyz="0 0 0.25" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14159" upper="3.14159" effort="50" velocity="2.0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <link name="wrist1_link">
+    <xacro:cylinder_inertia mass="0.3" radius="0.03" length="0.05"/>
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+      <material name="grey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       WRIST 2
+       ================================================================ -->
+
+  <joint name="wrist2_joint" type="revolute">
+    <parent link="wrist1_link"/>
+    <child link="wrist2_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-3.14159" upper="3.14159" effort="50" velocity="2.0"/>
+    <dynamics damping="0.1" friction="0.0"/>
+  </joint>
+
+  <link name="wrist2_link">
+    <xacro:cylinder_inertia mass="0.3" radius="0.03" length="0.05"/>
+    <visual>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.025" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.03" length="0.05"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       NEEDLE END-EFFECTOR
+       ================================================================ -->
+
+  <joint name="needle_joint" type="fixed">
+    <parent link="wrist2_link"/>
+    <child link="needle_link"/>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+  </joint>
+
+  <link name="needle_link">
+    <inertial>
+      <mass value="0.05"/>
+      <inertia
+        ixx="0.0001" ixy="0" ixz="0"
+        iyy="0.0001" iyz="0"
+        izz="0.000001"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.005" length="0.08"/></geometry>
+      <material name="silver"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.005" length="0.08"/></geometry>
+    </collision>
+  </link>
+
+  <!-- ================================================================
+       ROS2 CONTROL HARDWARE INTERFACE
+       ================================================================ -->
+
+  <ros2_control name="GazeboSystem" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <joint name="shoulder_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="upper_arm_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="forearm_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist1_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="wrist2_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+  <!-- ================================================================
+       GZ SIM PLUGIN TAG
+       ================================================================ -->
+
+  <gazebo>
+    <plugin filename="gz_ros2_control-system"
+            name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find catheter_sim)/config/controllers.yaml</parameters>
+      <ros>
+        <remapping>~/robot_description:=robot_description</remapping>
+      </ros>
+    </plugin>
+  </gazebo>
+
+</robot>

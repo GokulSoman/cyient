@@ -1,0 +1,9 @@
+std_msgs/Header header
+float32 center_x
+float32 center_y
+float32 bbox_x
+float32 bbox_y
+float32 bbox_w
+float32 bbox_h
+float32 confidence
+string label
