@@ -19,15 +19,16 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES std_msgs
 )
 
-# ── Install Python node scripts as executables ────────────────────
-# This makes them accessible via `ros2 run catheter_sim <script_name>`
-install(PROGRAMS
-  catheter_sim/vessel_detector.py
-  catheter_sim/image_publisher.py
-  catheter_sim/target_planner.py
-  catheter_sim/arm_controller.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+# ── Install Python node scripts as executables (no .py suffix) ───
+# ros2 run / Node(executable=...) expects names WITHOUT .py extension
+install(PROGRAMS catheter_sim/vessel_detector.py
+  DESTINATION lib/${PROJECT_NAME} RENAME vessel_detector)
+install(PROGRAMS catheter_sim/image_publisher.py
+  DESTINATION lib/${PROJECT_NAME} RENAME image_publisher)
+install(PROGRAMS catheter_sim/target_planner.py
+  DESTINATION lib/${PROJECT_NAME} RENAME target_planner)
+install(PROGRAMS catheter_sim/arm_controller.py
+  DESTINATION lib/${PROJECT_NAME} RENAME arm_controller)
 
 # ── Install the Python package __init__.py so imports work ────────
 install(FILES
