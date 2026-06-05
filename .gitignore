@@ -89,3 +89,16 @@ _CPack_Packages/
 *.orig
 *.rej
 pipeline_run_output.txt
+
+# SAM-VMNet external model + inference outputs
+/third_party/
+/output/
+
+# ─── ML model artifacts (large binaries; keep out of git) ────────────────────
+*.ckpt
+*.onnx
+*.pt
+*.pth
+*.pkl
+lightning_logs/
+results/sam_ckpts/
