@@ -5,7 +5,11 @@
 1. The dataset chosen is a  [carotid artery dataset.](https://data.mendeley.com/datasets/d4xt63mgjm/1).
 - This was done as I could not find a femoral artery dataset with ultrasound images. The assumption is that the model can be made to work on both these artery types with similar performance based on training data. The dataset contains 1100 ultrasound images and corresponding masks.
 2. Finetuned a pretrained segmentation model  [SAM vit base](https://huggingface.co/facebook/sam-vit-base) from huggingface achieving IoU of 0.90 in the test set, and an F1 Score of 0.95. Here the encoder part is kept out of training
-3. Converted the model to onnx format for efficiency (FP32 to INT8), with minimal loss in accuracy
+3. Quantized the fine-tuned model to **INT8** and exported it to **ONNX** in two parts (vision encoder + prompt/mask decoder — the standard SAM deployment shape) for efficient, framework-independent inference. Weight-only dynamic INT8 shrinks the model **3.55x** (375 MB → 106 MB, ~1.4x faster on CPU) with negligible accuracy loss:
+    - FP32 ONNX: Dice 0.945, IoU 0.896
+    - INT8 ONNX: Dice 0.941, IoU 0.890 (ΔDice 0.004, within the 0.02 tolerance gate)
+
+    The final quantized model (`results/sam_onnx/*.int8.onnx`) is tracked with **Git LFS**. Training and quantization are reproducible via `notebooks/train_sam_carotid_lightning.ipynb` and `notebooks/quantize_sam_to_onnx.ipynb` (the latter reports the full benchmark suite with literature references).
 4. Created a ROS package for the whole simulation flow. Currently a fallback image is used as feed to a pipeline that uses the vessel detector, and  manipulator is using the output from vessel detector to move locate its end-effector.
 
 # TO DO

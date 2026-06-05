@@ -102,3 +102,7 @@ pipeline_run_output.txt
 *.pkl
 lightning_logs/
 results/sam_ckpts/
+
+# Exception: track the final quantized INT8 ONNX model via Git LFS
+!results/sam_onnx/vision_encoder.int8.onnx
+!results/sam_onnx/prompt_encoder_mask_decoder.int8.onnx
